@@ -95,18 +95,16 @@
             font-weight: 600;
         }
 
-        /* Hero Image Container Style */
+        /* Hero Image/Video Container Style */
         .hero-img-placeholder {
             width: 100%;
             max-width: 800px;
-            height: 450px; /* 이미지 비율에 맞춰 높이 약간 조정 */
-            background: #f8f8f8;
+            height: 450px; /* 영상 비율에 맞춰 높이 조정 */
+            background: #000; /* 비디오 로딩 전 배경 */
             border: 1px solid rgba(0,0,0,0.05);
             margin: 0 auto;
             border-radius: 24px;
-            
-            /* Flex 제거하고 이미지를 위한 스타일 적용 */
-            overflow: hidden; /* 이미지가 둥근 모서리를 넘지 않도록 */
+            overflow: hidden; 
             position: relative;
             box-shadow: var(--glass-shadow);
             transition: transform 0.3s ease;
@@ -117,13 +115,14 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.1);
         }
 
-        /* Actual Image Style */
-        .hero-img-placeholder img {
+        /* Iframe Style (for YouTube) */
+        .hero-img-placeholder iframe {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* 비율 유지하며 꽉 채우기 */
-            display: block;
+            /* pointer-events: none; -> 영상을 클릭해서 멈추거나 하고 싶다면 이 줄을 지우세요. 배경처럼 쓰려면 두세요. */
+            pointer-events: none; 
         }
+
 
         /* 2. Sections Generic */
         .section { padding: 100px 0; }
@@ -163,20 +162,29 @@
 
         /* 4. Brand Mood */
         .brand-mood { position: relative; }
+        
+        /* [수정됨] 이미지를 담기 위한 스타일로 변경 */
         .mood-img-placeholder {
             width: 100%;
             height: 400px;
             background: #f8f8f8;
             border: 1px solid rgba(0,0,0,0.05);
             border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-sub);
             margin-bottom: 40px;
-            font-family: var(--font-secondary);
             box-shadow: var(--glass-shadow);
+            /* 기존 텍스트 정렬 스타일 제거 및 이미지용 스타일 추가 */
+            overflow: hidden;
+            position: relative;
         }
+
+        /* [신규] Mood 섹션 내부 이미지 스타일 */
+        .mood-img-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 이미지가 영역을 꽉 채우도록 설정 */
+            display: block;
+        }
+
         .mood-text { text-align: center; max-width: 600px; margin: 0 auto; }
         .mood-text strong { font-size: 1.4rem; color: var(--primary-color); display: block; margin-bottom: 20px; }
         .mood-text p { color: var(--text-sub); }
@@ -228,7 +236,8 @@
         @media (max-width: 768px) {
             .hero h1 { font-size: 2.2rem; }
             .benefit-grid { grid-template-columns: 1fr; }
-            .hero-img-placeholder { height: 250px; }
+            .hero-img-placeholder { height: 250px; } /* 모바일에서 비디오 높이 줄임 */
+            .mood-img-placeholder { height: 250px; } /* 모바일에서 이미지 높이 줄임 */
             .section { padding: 60px 0; }
         }
 
@@ -258,7 +267,13 @@
                 <h1>MoveFit과 함께 성장할<br>크리에이터를 찾습니다</h1>
                 
                 <div class="hero-img-placeholder">
-                    <img src="images/Gemini_Generated_Image_xkromoxkromoxkro.png" alt="MoveFit Main Visual">
+                    <iframe 
+                        src="https://www.youtube.com/embed/ZH5AJS0hMLQ?autoplay=1&mute=1&loop=1&playlist=ZH5AJS0hMLQ&controls=0&showinfo=0&rel=0&modestbranding=1" 
+                        title="MoveFit Brand Video" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
                 </div>
 
             </div>
@@ -292,8 +307,7 @@
                 <h2 class="section-title">Who we want?</h2>
                 
                 <div class="mood-img-placeholder">
-                    [파트너 활동 예시 이미지]<br>
-                    Active Lifestyle
+                    <img src="images/title1.png" alt="Active Lifestyle Partner">
                 </div>
 
                 <div class="mood-text">
@@ -639,4 +653,45 @@
 
         function setupEventListeners() {
             window.addEventListener("mousemove", onPointerMove, { passive: true });
-            window.addEventListener("touchstart", (e) => { e.preventDefault(); if(e.touches.length) onPointerMove(e.touches[0]); }, {
+            window.addEventListener("touchstart", (e) => { e.preventDefault(); if(e.touches.length) onPointerMove(e.touches[0]); }, { passive: false });
+            window.addEventListener("touchmove", (e) => { e.preventDefault(); if(e.touches.length) onPointerMove(e.touches[0]); }, { passive: false });
+            window.addEventListener("resize", onWindowResize, { passive: true });
+        }
+
+        function onPointerMove(event) {
+            targetMousePosition.x = event.clientX / window.innerWidth;
+            targetMousePosition.y = 1.0 - event.clientY / window.innerHeight;
+            
+            const aspect = window.innerWidth / window.innerHeight;
+            const uv_x = targetMousePosition.x * 2.0 - 1.0;
+            const uv_y = targetMousePosition.y * 2.0 - 1.0;
+            cursorSphere3D.set(uv_x * aspect * 2.0, uv_y * 2.0, 0.0);
+            
+            material.uniforms.uCursorSphere.value.copy(cursorSphere3D);
+        }
+
+        function onWindowResize() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const pixelRatio = Math.min(devicePixelRatio, isMobile ? 1.5 : 2);
+            
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(pixelRatio);
+            
+            material.uniforms.uResolution.value.set(width, height);
+            material.uniforms.uActualResolution.value.set(width * pixelRatio, height * pixelRatio);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            mousePosition.x += (targetMousePosition.x - mousePosition.x) * settings.mouseSmoothness;
+            mousePosition.y += (targetMousePosition.y - mousePosition.y) * settings.mouseSmoothness;
+            
+            material.uniforms.uTime.value = clock.getElapsedTime();
+            material.uniforms.uMousePosition.value = mousePosition;
+            
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
