@@ -16,13 +16,13 @@
 
         :root {
             /* --- Platinum Theme Colors --- */
-            --primary-color: #1a1a1a; /* 진한 블랙 */
-            --accent-color: #ff6b00; /* 더 선명한 오렌지 */
-            --bg-color: #ffffff; /* 완전한 화이트 */
+            --primary-color: #1a1a1a; 
+            --accent-color: #ff6b00; 
+            --bg-color: #ffffff; 
             
             /* Glassmorphism */
             --glass-bg: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(0, 0, 0, 0.05); /* 얇은 회색 테두리 */
+            --glass-border: rgba(0, 0, 0, 0.05); 
             --glass-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
 
             --text-main: #222222;
@@ -95,21 +95,34 @@
             font-weight: 600;
         }
 
+        /* Hero Image Container Style */
         .hero-img-placeholder {
             width: 100%;
             max-width: 800px;
-            height: 400px;
-            background: #f8f8f8; /* 아주 연한 회색 */
+            height: 450px; /* 이미지 비율에 맞춰 높이 약간 조정 */
+            background: #f8f8f8;
             border: 1px solid rgba(0,0,0,0.05);
             margin: 0 auto;
             border-radius: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-sub);
-            font-family: var(--font-secondary);
-            font-size: 0.9rem;
+            
+            /* Flex 제거하고 이미지를 위한 스타일 적용 */
+            overflow: hidden; /* 이미지가 둥근 모서리를 넘지 않도록 */
+            position: relative;
             box-shadow: var(--glass-shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .hero-img-placeholder:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+
+        /* Actual Image Style */
+        .hero-img-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 비율 유지하며 꽉 채우기 */
+            display: block;
         }
 
         /* 2. Sections Generic */
@@ -245,9 +258,9 @@
                 <h1>MoveFit과 함께 성장할<br>크리에이터를 찾습니다</h1>
                 
                 <div class="hero-img-placeholder">
-                    [브랜드 메인 영상/이미지 영역]<br>
-                    Clean & Professional Look
+                    <img src="images/Gemini_Generated_Image_xkromoxkromoxkro.png" alt="MoveFit Main Visual">
                 </div>
+
             </div>
         </header>
 
@@ -335,29 +348,28 @@
         const devicePixelRatio = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
 
         // --- Platinum Silver Preset ---
-        // 은색(무채색) 버블에 오렌지색 빛을 반사시켜 색 충돌을 없앰
         const bgPreset = {
             sphereCount: isMobile ? 3 : 6,
-            ambientIntensity: 0.9, /* 전체적으로 매우 밝게 */
+            ambientIntensity: 0.9,
             diffuseIntensity: 0.5,
-            specularIntensity: 2.5, /* 강한 금속성 반사 */
-            specularPower: 40, /* 매끄러운 표면 */
+            specularIntensity: 2.5,
+            specularPower: 40,
             fresnelPower: 2.0,
             
             // COLORS
-            backgroundColor: new THREE.Color(0xffffff), // 배경: 화이트
-            sphereColor: new THREE.Color(0xebebeb),   // 버블: 은은한 실버 그레이 (색을 뺌)
-            lightColor: new THREE.Color(0xffffff),    // 기본 조명: 화이트
+            backgroundColor: new THREE.Color(0xffffff),
+            sphereColor: new THREE.Color(0xebebeb), 
+            lightColor: new THREE.Color(0xffffff), 
             lightPosition: new THREE.Vector3(0.5, 1, 1),
             
             smoothness: 0.4,
             contrast: 1.05,
             fogDensity: 0.01,
             
-            // GLOW (핵심 포인트)
-            cursorGlowIntensity: 1.2, /* 글로우 강하게 */
+            // GLOW
+            cursorGlowIntensity: 1.2,
             cursorGlowRadius: 1.8,
-            cursorGlowColor: new THREE.Color(0xff6b00) // 오렌지색 글로우
+            cursorGlowColor: new THREE.Color(0xff6b00) 
         };
 
         const settings = {
@@ -582,7 +594,6 @@
                         vec3 diffuse = uLightColor * diff * uDiffuseIntensity;
                         vec3 specular = uLightColor * spec * uSpecularIntensity * fresnel;
                         
-                        // 은색 금속 느낌: 주변 환경광 반사
                         return uSphereColor + ambient + diffuse + specular;
                     }
                     
@@ -606,12 +617,10 @@
                             float fogAmount = 1.0 - exp(-t * uFogDensity);
                             color = mix(litColor, uBackgroundColor, fogAmount);
                             
-                            // 은색 구체에 오렌지색 빛이 반사되는 효과
                             color += uCursorGlowColor * cursorGlowFactor * 0.5;
                             
                             gl_FragColor = vec4(color, 1.0);
                         } else {
-                            // 배경 글로우는 아주 은은하게
                             vec3 glowColor = mix(uBackgroundColor, uCursorGlowColor, cursorGlowFactor * 0.2);
                             gl_FragColor = vec4(glowColor, 1.0);
                         }
@@ -630,45 +639,4 @@
 
         function setupEventListeners() {
             window.addEventListener("mousemove", onPointerMove, { passive: true });
-            window.addEventListener("touchstart", (e) => { e.preventDefault(); if(e.touches.length) onPointerMove(e.touches[0]); }, { passive: false });
-            window.addEventListener("touchmove", (e) => { e.preventDefault(); if(e.touches.length) onPointerMove(e.touches[0]); }, { passive: false });
-            window.addEventListener("resize", onWindowResize, { passive: true });
-        }
-
-        function onPointerMove(event) {
-            targetMousePosition.x = event.clientX / window.innerWidth;
-            targetMousePosition.y = 1.0 - event.clientY / window.innerHeight;
-            
-            const aspect = window.innerWidth / window.innerHeight;
-            const uv_x = targetMousePosition.x * 2.0 - 1.0;
-            const uv_y = targetMousePosition.y * 2.0 - 1.0;
-            cursorSphere3D.set(uv_x * aspect * 2.0, uv_y * 2.0, 0.0);
-            
-            material.uniforms.uCursorSphere.value.copy(cursorSphere3D);
-        }
-
-        function onWindowResize() {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            const pixelRatio = Math.min(devicePixelRatio, isMobile ? 1.5 : 2);
-            
-            renderer.setSize(width, height);
-            renderer.setPixelRatio(pixelRatio);
-            
-            material.uniforms.uResolution.value.set(width, height);
-            material.uniforms.uActualResolution.value.set(width * pixelRatio, height * pixelRatio);
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            mousePosition.x += (targetMousePosition.x - mousePosition.x) * settings.mouseSmoothness;
-            mousePosition.y += (targetMousePosition.y - mousePosition.y) * settings.mouseSmoothness;
-            
-            material.uniforms.uTime.value = clock.getElapsedTime();
-            material.uniforms.uMousePosition.value = mousePosition;
-            
-            renderer.render(scene, camera);
-        }
-    </script>
-</body>
-</html>
+            window.addEventListener("touchstart", (e) => { e.preventDefault(); if(e.touches.length) onPointerMove(e.touches[0]); }, {
