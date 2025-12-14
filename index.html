@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MoveFit Partners - Future of Fitness</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* * 통합 스타일 시트 
+         * Nexus의 3D 배경 스타일과 MoveFit의 레이아웃 스타일을 병합
+         */
+
+        /* 폰트 설정 */
+        @import url("https://fonts.cdnfonts.com/css/pp-neue-montreal");
+        @font-face {
+            font-family: "PPSupplyMono";
+            src: url("https://assets.codepen.io/7558/PPSupplyMono-Regular.ttf") format("truetype");
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+
+        :root {
+            /* MoveFit Colors - Dark Mode Adaptation */
+            --primary-color: #ffffff; /* 텍스트는 화이트로 변경 */
+            --accent-color: #e67e22; /* 오렌지 포인트 유지 */
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-sub: #cccccc;
+            
+            /* Nexus Variables */
+            --font-primary: "PP Neue Montreal", "Pretendard", sans-serif;
+            --font-secondary: "PPSupplyMono", monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Pretendard', var(--font-primary);
+            color: var(--text-main);
+            line-height: 1.6;
+            word-break: keep-all;
+            background-color: #050505; /* Fallback color */
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- 3D Background Canvas --- */
+        #container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 0;
+            pointer-events: none; /* 클릭 통과 */
+        }
+
+        /* --- UI Controls (Optional, hiding for clean portfolio) --- */
+        #ui-container { display: none; } 
+
+        /* --- Content Wrapper (Floats above Canvas) --- */
+        .content-wrapper {
+            position: relative;
+            z-index: 1; /* 캔버스 위에 배치 */
+            width: 100%;
+        }
+
+        .container { max-width: 100%; margin: 0 auto; }
+        .inner { max-width: 800px; margin: 0 auto; padding: 0 20px; }
+
+        /* 1. Hero Section */
+        .hero { 
+            /* 배경색 제거 (투명), 3D 배경이 보이도록 */
+            background-color: transparent; 
+            color: #fff; 
+            padding: 120px 0 80px; 
+            text-align: center; 
+            position: relative;
+        }
+        
+        .hero h1 { 
+            font-family: var(--font-primary);
+            font-size: 3.5rem; 
+            font-weight: 800; 
+            margin-bottom: 15px;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .hero p { 
+            font-family: var(--font-secondary);
+            font-size: 1rem; 
+            color: var(--accent-color);
+            margin-bottom: 40px; 
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .hero-img-placeholder {
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+            /* Glassmorphism */
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            margin: 0 auto;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-family: var(--font-secondary);
+            font-size: 0.9rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        /* 2. Sections Generic */
+        .section { padding: 100px 0; }
+        .section-title { 
+            text-align: center; 
+            font-size: 2.5rem; 
+            margin-bottom: 60px; 
+            font-weight: 700;
+            font-family: var(--font-primary);
+        }
+
+        /* 3. Benefits Grid */
+        .benefit-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: center; }
+        
+        .benefit-card { 
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            padding: 40px 20px; 
+            border-radius: 16px; 
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+        
+        .benefit-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .benefit-icon { font-size: 2.5rem; margin-bottom: 20px; display: block; }
+        .benefit-card h3 { font-size: 1.3rem; margin-bottom: 15px; color: #fff; }
+        .benefit-card p { font-size: 0.95rem; color: var(--text-sub); line-height: 1.6; }
+
+        /* 4. Brand Mood */
+        .brand-mood { position: relative; }
+        .mood-img-placeholder {
+            width: 100%;
+            height: 400px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-family: var(--font-secondary);
+        }
+        .mood-text { text-align: center; max-width: 600px; margin: 0 auto; }
+        .mood-text strong { font-size: 1.4rem; color: #fff; display: block; margin-bottom: 20px; }
+        .mood-text p { color: var(--text-sub); }
+
+        /* 5. Apply CTA */
+        .apply-section { padding-bottom: 150px; }
+        .apply-box { 
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 60px 30px; 
+            border-radius: 30px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2); 
+            text-align: center;
+        }
+        
+        .btn-apply {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: #fff;
+            padding: 20px 60px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 10px 30px rgba(230, 126, 34, 0.3);
+            margin-top: 30px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .btn-apply:hover { 
+            transform: scale(1.05); 
+            box-shadow: 0 15px 40px rgba(230, 126, 34, 0.5);
+            background-color: #ff8c33;
+        }
+
+        footer {
+            border-top: 1px solid var(--glass-border);
+            padding: 40px 0;
+            text-align: center;
+            color: #666;
+            font-family: var(--font-secondary);
+            font-size: 0.8rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Mobile Response */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2rem; }
+            .benefit-grid { grid-template-columns: 1fr; }
+            .hero-img-placeholder { height: 250px; }
+            .section { padding: 60px 0; }
+        }
+
+        /* Overlay Texture (Dust) */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: url("https://img.freepik.com/premium-photo/white-dust-scratches-black-background_279525-2.jpg?w=640");
+            background-repeat: repeat;
+            opacity: 0.15;
+            mix-blend-mode: screen;
+            pointer-events: none;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container"></div>
+
+    <div id="ui-container"></div>
+
+    <div class="content-wrapper">
+        <header class="hero">
+            <div class="inner">
+                <p>WE ARE LOOKING FOR PARTNERS</p>
+                <h1>MoveFit과 함께 성장할<br>크리에이터를 찾습니다</h1>
+                
+                <div class="hero-img-placeholder">
+                    [브랜드 메인 영상/이미지 영역]<br>
+                    Fluid Dynamics Theme
+                </div>
+            </div>
+        </header>
+
+        <section class="section">
+            <div class="inner">
+                <h2 class="section-title">Partner Benefits</h2>
+                <div class="benefit-grid">
+                    <div class="benefit-card">
+                        <span class="benefit-icon">🎁</span>
+                        <h3>신제품 무료 제공</h3>
+                        <p>무브핏의 프리미엄 라인업 제품을<br>가장 먼저 체험해보세요.</p>
+                    </div>
+                    <div class="benefit-card">
+                        <span class="benefit-icon">💰</span>
+                        <h3>판매 수익 쉐어</h3>
+                        <p>전용 링크를 통한 구매 발생 시<br>업계 최고 수준의 커미션 제공</p>
+                    </div>
+                    <div class="benefit-card">
+                        <span class="benefit-icon">📢</span>
+                        <h3>공식 채널 홍보</h3>
+                        <p>무브핏 공식 인스타그램 및 사이트에<br>파트너님의 콘텐츠가 소개됩니다.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section brand-mood">
+            <div class="inner">
+                <h2 class="section-title">Who we want?</h2>
+                
+                <div class="mood-img-placeholder">
+                    [파트너 활동 예시 이미지]<br>
+                    Home Training Lifestyle
+                </div>
+
+                <div class="mood-text">
+                    <p style="font-family: var(--font-secondary); color: var(--accent-color); margin-bottom: 10px;">CORE VALUE</p>
+                    <strong>"건강한 에너지를 나누는 사람"</strong>
+                    <p>
+                        팔로워 수가 많지 않아도 괜찮습니다.<br>
+                        자신만의 운동 루틴을 즐기고, 솔직한 리뷰를 남겨주실 수 있는 분.<br>
+                        무브핏의 가치를 함께 알릴 열정적인 파트너라면 누구나 환영합니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section apply-section">
+            <div class="inner">
+                <div class="apply-box">
+                    <h2 style="margin-bottom: 15px; color: #fff;">지금 바로 지원하세요</h2>
+                    <p style="margin-bottom: 30px; color: #ccc;">
+                        간단한 정보를 남겨주시면 담당자가 검토 후<br>
+                        3일 이내에 개별 연락 드립니다.
+                    </p>
+                    
+                    <a href="https://forms.google.com/" target="_blank" class="btn-apply">
+                        파트너 신청하기 🚀
+                    </a>
+                    
+                    <p style="margin-top: 30px; font-size: 0.9rem; color: #666;">
+                        *문의사항: support@movefit.co.kr
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="inner">
+                <p>&copy; 2025 MoveFit. All Rights Reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script type="module">
+        import * as THREE from "https://esm.sh/three@0.178.0";
+        import { Pane } from "https://cdn.skypack.dev/tweakpane@4.0.4";
+
+        let scene, camera, renderer, material;
+        let clock, mouse = { x: 0, y: 0 };
+        let cursorSphere3D = new THREE.Vector3(0, 0, 0);
+        let activeMerges = 0;
+        let targetMousePosition = new THREE.Vector2(0.5, 0.5);
+        let mousePosition = new THREE.Vector2(0.5, 0.5);
+        let lastTime = performance.now();
+        let frameCount = 0;
+        let fps = 0;
+
+        // Device detection
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        const isLowPowerDevice = isMobile || navigator.hardwareConcurrency <= 4;
+        const devicePixelRatio = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
+
+        // Define Presets - We will use a modified "Cosmic/Minimal" blend for the background
+        const bgPreset = {
+            sphereCount: isMobile ? 3 : 6,
+            ambientIntensity: 0.05,
+            diffuseIntensity: 0.5,
+            specularIntensity: 1.0,
+            specularPower: 10,
+            fresnelPower: 2.0,
+            // Darker background to make text readable
+            backgroundColor: new THREE.Color(0x050505),
+            sphereColor: new THREE.Color(0x0a0a0a),
+            // Orange/Blue tint to match MoveFit/Tech vibe
+            lightColor: new THREE.Color(0xff8866), // Subtle orange tint
+            lightPosition: new THREE.Vector3(1, 0.5, 0.8),
+            smoothness: 0.4,
+            contrast: 1.5,
+            fogDensity: 0.1,
+            cursorGlowIntensity: 0.6,
+            cursorGlowRadius: 1.2,
+            cursorGlowColor: new THREE.Color(0xff6644) // Orange glow
+        };
+
+        const settings = {
+            ...bgPreset,
+            fixedTopLeftRadius: 0.8,
+            fixedBottomRightRadius: 0.9,
+            smallTopLeftRadius: 0.3,
+            smallBottomRightRadius: 0.35,
+            cursorRadiusMin: 0.08,
+            cursorRadiusMax: 0.15,
+            animationSpeed: 0.4, // Slower for background
+            movementScale: 1.0,
+            mouseSmoothness: 0.08,
+            mergeDistance: 1.5,
+            mouseProximityEffect: true,
+            minMovementScale: 0.3,
+            maxMovementScale: 1.0
+        };
+
+        init();
+        animate();
+
+        function init() {
+            const container = document.getElementById("container");
+            scene = new THREE.Scene();
+            camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
+            camera.position.z = 1;
+            clock = new THREE.Clock();
+
+            renderer = new THREE.WebGLRenderer({
+                antialias: !isMobile && !isLowPowerDevice,
+                alpha: true,
+                powerPreference: "high-performance",
+                preserveDrawingBuffer: false,
+                premultipliedAlpha: false
+            });
+
+            const pixelRatio = Math.min(devicePixelRatio, isMobile ? 1.5 : 2);
+            renderer.setPixelRatio(pixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 0);
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+            const canvas = renderer.domElement;
+            canvas.style.cssText = `
+                position: fixed !important; top: 0 !important; left: 0 !important;
+                width: 100vw !important; height: 100vh !important;
+                z-index: 0 !important; display: block !important;
+            `;
+            container.appendChild(canvas);
+
+            // Shader Material Setup (Same as provided code)
+            material = new THREE.ShaderMaterial({
+                uniforms: {
+                    uTime: { value: 0 },
+                    uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+                    uActualResolution: { value: new THREE.Vector2(window.innerWidth * pixelRatio, window.innerHeight * pixelRatio) },
+                    uPixelRatio: { value: pixelRatio },
+                    uMousePosition: { value: new THREE.Vector2(0.5, 0.5) },
+                    uCursorSphere: { value: new THREE.Vector3(0, 0, 0) },
+                    uCursorRadius: { value: settings.cursorRadiusMin },
+                    uSphereCount: { value: settings.sphereCount },
+                    uFixedTopLeftRadius: { value: settings.fixedTopLeftRadius },
+                    uFixedBottomRightRadius: { value: settings.fixedBottomRightRadius },
+                    uSmallTopLeftRadius: { value: settings.smallTopLeftRadius },
+                    uSmallBottomRightRadius: { value: settings.smallBottomRightRadius },
+                    uMergeDistance: { value: settings.mergeDistance },
+                    uSmoothness: { value: settings.smoothness },
+                    uAmbientIntensity: { value: settings.ambientIntensity },
+                    uDiffuseIntensity: { value: settings.diffuseIntensity },
+                    uSpecularIntensity: { value: settings.specularIntensity },
+                    uSpecularPower: { value: settings.specularPower },
+                    uFresnelPower: { value: settings.fresnelPower },
+                    uBackgroundColor: { value: settings.backgroundColor },
+                    uSphereColor: { value: settings.sphereColor },
+                    uLightColor: { value: settings.lightColor },
+                    uLightPosition: { value: settings.lightPosition },
+                    uContrast: { value: settings.contrast },
+                    uFogDensity: { value: settings.fogDensity },
+                    uAnimationSpeed: { value: settings.animationSpeed },
+                    uMovementScale: { value: settings.movementScale },
+                    uMouseProximityEffect: { value: settings.mouseProximityEffect },
+                    uMinMovementScale: { value: settings.minMovementScale },
+                    uMaxMovementScale: { value: settings.maxMovementScale },
+                    uCursorGlowIntensity: { value: settings.cursorGlowIntensity },
+                    uCursorGlowRadius: { value: settings.cursorGlowRadius },
+                    uCursorGlowColor: { value: settings.cursorGlowColor },
+                    uIsSafari: { value: isSafari ? 1.0 : 0.0 },
+                    uIsMobile: { value: isMobile ? 1.0 : 0.0 },
+                    uIsLowPower: { value: isLowPowerDevice ? 1.0 : 0.0 }
+                },
+                vertexShader: `
+                    varying vec2 vUv;
+                    void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
+                `,
+                fragmentShader: `
+                    precision highp float;
+                    uniform float uTime;
+                    uniform vec2 uResolution;
+                    uniform vec2 uActualResolution;
+                    uniform vec2 uMousePosition;
+                    uniform vec3 uCursorSphere;
+                    uniform float uCursorRadius;
+                    uniform int uSphereCount;
+                    uniform float uFixedTopLeftRadius;
+                    uniform float uFixedBottomRightRadius;
+                    uniform float uSmallTopLeftRadius;
+                    uniform float uSmallBottomRightRadius;
+                    uniform float uMergeDistance;
+                    uniform float uSmoothness;
+                    uniform float uAmbientIntensity;
+                    uniform float uDiffuseIntensity;
+                    uniform float uSpecularIntensity;
+                    uniform float uSpecularPower;
+                    uniform float uFresnelPower;
+                    uniform vec3 uBackgroundColor;
+                    uniform vec3 uSphereColor;
+                    uniform vec3 uLightColor;
+                    uniform vec3 uLightPosition;
+                    uniform float uContrast;
+                    uniform float uFogDensity;
+                    uniform float uAnimationSpeed;
+                    uniform float uMovementScale;
+                    uniform bool uMouseProximityEffect;
+                    uniform float uMinMovementScale;
+                    uniform float uMaxMovementScale;
+                    uniform float uCursorGlowIntensity;
+                    uniform float uCursorGlowRadius;
+                    uniform vec3 uCursorGlowColor;
+                    uniform float uIsMobile;
+                    
+                    const float PI = 3.14159265359;
+                    const float EPSILON = 0.001;
+                    const float MAX_DIST = 100.0;
+                    
+                    float smin(float a, float b, float k) {
+                        float h = max(k - abs(a - b), 0.0) / k;
+                        return min(a, b) - h * h * k * 0.25;
+                    }
+                    float sdSphere(vec3 p, float r) { return length(p) - r; }
+                    vec3 screenToWorld(vec2 normalizedPos) {
+                        vec2 uv = normalizedPos * 2.0 - 1.0;
+                        uv.x *= uResolution.x / uResolution.y;
+                        return vec3(uv * 2.0, 0.0);
+                    }
+                    float getDistanceToCenter(vec2 pos) { return smoothstep(0.0, 1.0, length(pos - vec2(0.5)) * 2.0); }
+                    
+                    float sceneSDF(vec3 pos) {
+                        float result = MAX_DIST;
+                        vec3 topLeftPos = screenToWorld(vec2(0.08, 0.92));
+                        float topLeft = sdSphere(pos - topLeftPos, uFixedTopLeftRadius);
+                        vec3 smallTopLeftPos = screenToWorld(vec2(0.25, 0.72));
+                        float smallTopLeft = sdSphere(pos - smallTopLeftPos, uSmallTopLeftRadius);
+                        vec3 bottomRightPos = screenToWorld(vec2(0.92, 0.08));
+                        float bottomRight = sdSphere(pos - bottomRightPos, uFixedBottomRightRadius);
+                        vec3 smallBottomRightPos = screenToWorld(vec2(0.72, 0.25));
+                        float smallBottomRight = sdSphere(pos - smallBottomRightPos, uSmallBottomRightRadius);
+                        
+                        float t = uTime * uAnimationSpeed;
+                        float dynamicMovementScale = uMovementScale;
+                        if (uMouseProximityEffect) {
+                            float mixFactor = smoothstep(0.0, 1.0, getDistanceToCenter(uMousePosition));
+                            dynamicMovementScale = mix(uMinMovementScale, uMaxMovementScale, mixFactor);
+                        }
+                        
+                        for (int i = 0; i < 10; i++) {
+                            if (i >= uSphereCount) break;
+                            float fi = float(i);
+                            float speed = 0.4 + fi * 0.12;
+                            float radius = 0.12 + mod(fi, 3.0) * 0.06;
+                            float orbitRadius = (0.3 + mod(fi, 3.0) * 0.15) * dynamicMovementScale;
+                            float phaseOffset = fi * PI * 0.35;
+                            vec3 offset = vec3(
+                                sin(t * speed + phaseOffset) * orbitRadius * 0.8,
+                                cos(t * speed * 0.85 + phaseOffset * 1.3) * orbitRadius * 0.6,
+                                sin(t * speed * 0.5 + phaseOffset) * 0.3
+                            );
+                            
+                            vec3 toCursor = uCursorSphere - offset;
+                            float cursorDist = length(toCursor);
+                            if (cursorDist < uMergeDistance) {
+                                float attraction = (1.0 - cursorDist / uMergeDistance) * 0.3;
+                                offset += normalize(toCursor) * attraction;
+                            }
+                            
+                            float movingSphere = sdSphere(pos - offset, radius);
+                            float blend = 0.05;
+                            if (cursorDist < uMergeDistance) {
+                                float influence = 1.0 - (cursorDist / uMergeDistance);
+                                blend = mix(0.0
