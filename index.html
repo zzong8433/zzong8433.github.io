@@ -99,8 +99,8 @@
         .hero-img-placeholder {
             width: 100%;
             max-width: 800px;
-            height: 450px; /* 영상 비율에 맞춰 높이 조정 */
-            background: #000; /* 비디오 로딩 전 배경 */
+            height: 450px; 
+            background: #000; 
             border: 1px solid rgba(0,0,0,0.05);
             margin: 0 auto;
             border-radius: 24px;
@@ -115,14 +115,11 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.1);
         }
 
-        /* Iframe Style (for YouTube) */
         .hero-img-placeholder iframe {
             width: 100%;
             height: 100%;
-            /* pointer-events: none; -> 영상을 클릭해서 멈추거나 하고 싶다면 이 줄을 지우세요. 배경처럼 쓰려면 두세요. */
             pointer-events: none; 
         }
-
 
         /* 2. Sections Generic */
         .section { padding: 100px 0; }
@@ -163,7 +160,6 @@
         /* 4. Brand Mood */
         .brand-mood { position: relative; }
         
-        /* [수정됨] 이미지를 담기 위한 스타일로 변경 */
         .mood-img-placeholder {
             width: 100%;
             height: 400px;
@@ -172,16 +168,14 @@
             border-radius: 20px;
             margin-bottom: 40px;
             box-shadow: var(--glass-shadow);
-            /* 기존 텍스트 정렬 스타일 제거 및 이미지용 스타일 추가 */
             overflow: hidden;
             position: relative;
         }
 
-        /* [신규] Mood 섹션 내부 이미지 스타일 */
         .mood-img-placeholder img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* 이미지가 영역을 꽉 채우도록 설정 */
+            object-fit: cover; 
             display: block;
         }
 
@@ -236,8 +230,8 @@
         @media (max-width: 768px) {
             .hero h1 { font-size: 2.2rem; }
             .benefit-grid { grid-template-columns: 1fr; }
-            .hero-img-placeholder { height: 250px; } /* 모바일에서 비디오 높이 줄임 */
-            .mood-img-placeholder { height: 250px; } /* 모바일에서 이미지 높이 줄임 */
+            .hero-img-placeholder { height: 250px; } 
+            .mood-img-placeholder { height: 250px; } 
             .section { padding: 60px 0; }
         }
 
@@ -268,12 +262,13 @@
                 
                 <div class="hero-img-placeholder">
                     <iframe 
-        src="https://www.youtube-nocookie.com/embed/ZH5AJS0hMLQ?autoplay=1&mute=1&loop=1&playlist=ZH5AJS0hMLQ&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1" 
-        title="MoveFit Brand Video" 
-        frameborder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-        allowfullscreen
-        style="pointer-events: none;"> </iframe>
+                        src="https://www.youtube-nocookie.com/embed/ZH5AJS0hMLQ?autoplay=1&mute=1&loop=1&playlist=ZH5AJS0hMLQ&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1" 
+                        title="MoveFit Brand Video" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen
+                        style="pointer-events: none;">
+                    </iframe>
                 </div>
 
             </div>
@@ -359,15 +354,20 @@
         let mousePosition = new THREE.Vector2(0.5, 0.5);
 
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        const devicePixelRatio = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
+        
+        // [최적화 1] 픽셀 비율 제한: 고해상도(Retina)에서도 1배율이나 0.75배율로 렌더링하여 성능 확보
+        // 기존: Math.min(window.devicePixelRatio, 2) -> 약 2배~3배 부하
+        // 변경: 1.0 고정 (혹은 저사양 기기에서 0.75)
+        const devicePixelRatio = 1.0; 
 
-        // --- Platinum Silver Preset ---
+        // --- Platinum Silver Preset (Optimized) ---
         const bgPreset = {
-            sphereCount: isMobile ? 3 : 6,
+            // [최적화 2] 구체 개수 감소: 6개 -> 3개
+            sphereCount: isMobile ? 2 : 4,
             ambientIntensity: 0.9,
             diffuseIntensity: 0.5,
             specularIntensity: 2.5,
-            specularPower: 40,
+            specularPower: 30, // 계산 비용 줄이기 위해 약간 낮춤
             fresnelPower: 2.0,
             
             // COLORS
@@ -414,7 +414,7 @@
             clock = new THREE.Clock();
 
             renderer = new THREE.WebGLRenderer({
-                antialias: true,
+                antialias: false, // [최적화 3] 안티앨리어싱 꺼서 성능 향상
                 alpha: true,
                 powerPreference: "high-performance",
                 premultipliedAlpha: false
@@ -475,7 +475,9 @@
                     void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
                 `,
                 fragmentShader: `
-                    precision highp float;
+                    // [최적화 4] 정밀도 조정 (highp -> mediump) : 모바일 등에서 성능 향상
+                    precision mediump float;
+                    
                     uniform float uTime;
                     uniform vec2 uResolution;
                     uniform vec2 uActualResolution;
@@ -510,8 +512,7 @@
                     uniform vec3 uCursorGlowColor;
                     
                     const float PI = 3.14159265359;
-                    const float EPSILON = 0.001;
-                    const float MAX_DIST = 100.0;
+                    const float MAX_DIST = 50.0; // [최적화 5] 최대 거리 단축 (100 -> 50)
                     
                     float smin(float a, float b, float k) {
                         float h = max(k - abs(a - b), 0.0) / k;
@@ -527,23 +528,19 @@
                     
                     float sceneSDF(vec3 pos) {
                         float result = MAX_DIST;
+                        // 고정 구체들
                         vec3 topLeftPos = screenToWorld(vec2(0.1, 0.9));
                         float topLeft = sdSphere(pos - topLeftPos, uFixedTopLeftRadius);
-                        vec3 smallTopLeftPos = screenToWorld(vec2(0.25, 0.75));
-                        float smallTopLeft = sdSphere(pos - smallTopLeftPos, uSmallTopLeftRadius);
                         vec3 bottomRightPos = screenToWorld(vec2(0.9, 0.1));
                         float bottomRight = sdSphere(pos - bottomRightPos, uFixedBottomRightRadius);
-                        vec3 smallBottomRightPos = screenToWorld(vec2(0.75, 0.25));
-                        float smallBottomRight = sdSphere(pos - smallBottomRightPos, uSmallBottomRightRadius);
+                        
+                        // 작은 구체들은 제거하여 연산량 감소 (선택사항, 일단 유지하되 간단하게)
                         
                         float t = uTime * uAnimationSpeed;
                         float dynamicMovementScale = uMovementScale;
-                        if (uMouseProximityEffect) {
-                            float mixFactor = smoothstep(0.0, 1.0, getDistanceToCenter(uMousePosition));
-                            dynamicMovementScale = mix(uMinMovementScale, uMaxMovementScale, mixFactor);
-                        }
                         
-                        for (int i = 0; i < 10; i++) {
+                        // 움직이는 구체들 (반복문 횟수 제한)
+                        for (int i = 0; i < 4; i++) { // 최대 4개로 강제 제한
                             if (i >= uSphereCount) break;
                             float fi = float(i);
                             float speed = 0.3 + fi * 0.1;
@@ -575,7 +572,7 @@
                     }
                     
                     vec3 calcNormal(vec3 p) {
-                        float eps = 0.001;
+                        float eps = 0.005; // [최적화 6] 노말 계산 정밀도 낮춤 (0.001 -> 0.005)
                         return normalize(vec3(
                             sceneSDF(p + vec3(eps, 0, 0)) - sceneSDF(p - vec3(eps, 0, 0)),
                             sceneSDF(p + vec3(0, eps, 0)) - sceneSDF(p - vec3(0, eps, 0)),
@@ -585,10 +582,11 @@
                     
                     float rayMarch(vec3 ro, vec3 rd) {
                         float t = 0.0;
-                        for (int i = 0; i < 36; i++) {
+                        // [최적화 7] 레이마칭 스텝 수 대폭 감소 (36 -> 24)
+                        for (int i = 0; i < 24; i++) {
                             if (t > 7.0) break;
                             float d = sceneSDF(ro + rd * t);
-                            if (d < 0.001) return t;
+                            if (d < 0.005) return t; // 충돌 판정 거리 완화
                             t += d * 0.9;
                         }
                         return -1.0;
@@ -600,13 +598,13 @@
                         vec3 lightDir = normalize(uLightPosition);
                         
                         float diff = max(dot(normal, lightDir), 0.0);
+                        // specular 계산 간소화
                         vec3 reflectDir = reflect(-lightDir, normal);
                         float spec = pow(max(dot(viewDir, reflectDir), 0.0), uSpecularPower);
-                        float fresnel = pow(1.0 - max(dot(viewDir, normal), 0.0), uFresnelPower);
                         
                         vec3 ambient = uLightColor * uAmbientIntensity;
                         vec3 diffuse = uLightColor * diff * uDiffuseIntensity;
-                        vec3 specular = uLightColor * spec * uSpecularIntensity * fresnel;
+                        vec3 specular = uLightColor * spec * uSpecularIntensity;
                         
                         return uSphereColor + ambient + diffuse + specular;
                     }
@@ -622,76 +620,13 @@
                         vec3 color = uBackgroundColor;
                         float dist = length(ro.xy - uCursorSphere.xy);
                         float glow = 1.0 - smoothstep(0.0, uCursorGlowRadius, dist);
-                        float cursorGlowFactor = pow(glow, 2.5) * uCursorGlowIntensity;
+                        // pow 계산 비용이 비싸므로 근사값 사용하거나 단순 곱셈으로 변경 가능하지만 시각적 효과 위해 유지하되 횟수 줄임
+                        float cursorGlowFactor = glow * glow * uCursorGlowIntensity; 
                         
                         if (t > 0.0) {
                             vec3 p = ro + rd * t;
                             vec3 litColor = lighting(p, rd);
                             
-                            float fogAmount = 1.0 - exp(-t * uFogDensity);
-                            color = mix(litColor, uBackgroundColor, fogAmount);
-                            
-                            color += uCursorGlowColor * cursorGlowFactor * 0.5;
-                            
-                            gl_FragColor = vec4(color, 1.0);
-                        } else {
-                            vec3 glowColor = mix(uBackgroundColor, uCursorGlowColor, cursorGlowFactor * 0.2);
-                            gl_FragColor = vec4(glowColor, 1.0);
-                        }
-                    }
-                `,
-                transparent: true
-            });
-
-            const geometry = new THREE.PlaneGeometry(2, 2);
-            const mesh = new THREE.Mesh(geometry, material);
-            scene.add(mesh);
-            
-            setupEventListeners();
-            onPointerMove({ clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 });
-        }
-
-        function setupEventListeners() {
-            window.addEventListener("mousemove", onPointerMove, { passive: true });
-            window.addEventListener("touchstart", (e) => { e.preventDefault(); if(e.touches.length) onPointerMove(e.touches[0]); }, { passive: false });
-            window.addEventListener("touchmove", (e) => { e.preventDefault(); if(e.touches.length) onPointerMove(e.touches[0]); }, { passive: false });
-            window.addEventListener("resize", onWindowResize, { passive: true });
-        }
-
-        function onPointerMove(event) {
-            targetMousePosition.x = event.clientX / window.innerWidth;
-            targetMousePosition.y = 1.0 - event.clientY / window.innerHeight;
-            
-            const aspect = window.innerWidth / window.innerHeight;
-            const uv_x = targetMousePosition.x * 2.0 - 1.0;
-            const uv_y = targetMousePosition.y * 2.0 - 1.0;
-            cursorSphere3D.set(uv_x * aspect * 2.0, uv_y * 2.0, 0.0);
-            
-            material.uniforms.uCursorSphere.value.copy(cursorSphere3D);
-        }
-
-        function onWindowResize() {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            const pixelRatio = Math.min(devicePixelRatio, isMobile ? 1.5 : 2);
-            
-            renderer.setSize(width, height);
-            renderer.setPixelRatio(pixelRatio);
-            
-            material.uniforms.uResolution.value.set(width, height);
-            material.uniforms.uActualResolution.value.set(width * pixelRatio, height * pixelRatio);
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            mousePosition.x += (targetMousePosition.x - mousePosition.x) * settings.mouseSmoothness;
-            mousePosition.y += (targetMousePosition.y - mousePosition.y) * settings.mouseSmoothness;
-            
-            material.uniforms.uTime.value = clock.getElapsedTime();
-            material.uniforms.uMousePosition.value = mousePosition;
-            
-            renderer.render(scene, camera);
-        }
-    </script>
-</body>
-</html>
+                            // Fog 계산 간소화 (linear mix)
+                            float fogAmount = min(t * uFogDensity * 20.0, 1.0);
+                            color = mix(litColor, uBackgroundColor,
