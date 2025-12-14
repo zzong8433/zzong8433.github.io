@@ -629,4 +629,71 @@
                             
                             // Fog 계산 간소화 (linear mix)
                             float fogAmount = min(t * uFogDensity * 20.0, 1.0);
-                            color = mix(litColor, uBackgroundColor,
+                            color = mix(litColor, uBackgroundColor, fogAmount);
+                            
+                            color += uCursorGlowColor * cursorGlowFactor * 0.5;
+                            gl_FragColor = vec4(color, 1.0);
+                        } else {
+                            vec3 glowColor = mix(uBackgroundColor, uCursorGlowColor, cursorGlowFactor * 0.2);
+                            gl_FragColor = vec4(glowColor, 1.0);
+                        }
+                    }
+                `,
+                transparent: true
+            });
+
+            const geometry = new THREE.PlaneGeometry(2, 2);
+            const mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+            
+            setupEventListeners();
+            onPointerMove({ clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 });
+        }
+
+        function setupEventListeners() {
+            // [최적화 8] 이벤트 리스너 최적화 (passive: true 유지)
+            window.addEventListener("mousemove", onPointerMove, { passive: true });
+            window.addEventListener("touchstart", (e) => { e.preventDefault(); if(e.touches.length) onPointerMove(e.touches[0]); }, { passive: false });
+            window.addEventListener("touchmove", (e) => { e.preventDefault(); if(e.touches.length) onPointerMove(e.touches[0]); }, { passive: false });
+            window.addEventListener("resize", onWindowResize, { passive: true });
+        }
+
+        function onPointerMove(event) {
+            targetMousePosition.x = event.clientX / window.innerWidth;
+            targetMousePosition.y = 1.0 - event.clientY / window.innerHeight;
+            
+            // 쉐이더로 보낼 값만 여기서 계산 (가벼움)
+            const aspect = window.innerWidth / window.innerHeight;
+            const uv_x = targetMousePosition.x * 2.0 - 1.0;
+            const uv_y = targetMousePosition.y * 2.0 - 1.0;
+            cursorSphere3D.set(uv_x * aspect * 2.0, uv_y * 2.0, 0.0);
+            material.uniforms.uCursorSphere.value.copy(cursorSphere3D);
+        }
+
+        function onWindowResize() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            renderer.setSize(width, height);
+            // 리사이즈 시에도 픽셀 비율 1.0 유지
+            renderer.setPixelRatio(devicePixelRatio);
+            
+            material.uniforms.uResolution.value.set(width, height);
+            material.uniforms.uActualResolution.value.set(width * devicePixelRatio, height * devicePixelRatio);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // 마우스 스무딩 계산
+            mousePosition.x += (targetMousePosition.x - mousePosition.x) * settings.mouseSmoothness;
+            mousePosition.y += (targetMousePosition.y - mousePosition.y) * settings.mouseSmoothness;
+            
+            material.uniforms.uTime.value = clock.getElapsedTime();
+            material.uniforms.uMousePosition.value = mousePosition;
+            
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
