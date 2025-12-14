@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MoveFit Partners - Future of Fitness</title>
+    <title>MoveFit Partners - Light Theme</title>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        /* * 통합 스타일 시트 
-         * Nexus의 3D 배경 스타일과 MoveFit의 레이아웃 스타일을 병합
-         */
-
         /* 폰트 설정 */
         @import url("https://fonts.cdnfonts.com/css/pp-neue-montreal");
         @font-face {
@@ -19,15 +15,20 @@
         }
 
         :root {
-            /* MoveFit Colors - Dark Mode Adaptation */
-            --primary-color: #ffffff; /* 텍스트는 화이트로 변경 */
-            --accent-color: #e67e22; /* 오렌지 포인트 유지 */
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-main: #ffffff;
-            --text-sub: #cccccc;
+            /* --- Light Theme Colors --- */
+            --primary-color: #222222; /* 메인 텍스트: 진한 회색 */
+            --accent-color: #e67e22; /* 포인트: 오렌지 유지 */
+            --bg-color: #f0f2f5; /* 배경: 밝은 오프 화이트 */
             
-            /* Nexus Variables */
+            /* Glassmorphism for Light Theme (밝은 유리) */
+            --glass-bg: rgba(255, 255, 255, 0.6); /* 불투명도를 높인 흰색 */
+            --glass-border: rgba(255, 255, 255, 0.9); /* 밝은 테두리 */
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); /* 부드러운 그림자 */
+
+            --text-main: #333333;
+            --text-sub: #666666;
+            
+            /* Fonts */
             --font-primary: "PP Neue Montreal", "Pretendard", sans-serif;
             --font-secondary: "PPSupplyMono", monospace;
         }
@@ -39,7 +40,7 @@
             color: var(--text-main);
             line-height: 1.6;
             word-break: keep-all;
-            background-color: #050505; /* Fallback color */
+            background-color: var(--bg-color);
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
         }
@@ -50,16 +51,17 @@
             top: 0; left: 0;
             width: 100vw; height: 100vh;
             z-index: 0;
-            pointer-events: none; /* 클릭 통과 */
+            pointer-events: none;
+            /* 캔버스 자체가 밝은 배경색을 가지도록 설정 */
+            background-color: var(--bg-color);
         }
 
-        /* --- UI Controls (Optional, hiding for clean portfolio) --- */
         #ui-container { display: none; } 
 
-        /* --- Content Wrapper (Floats above Canvas) --- */
+        /* --- Content Wrapper --- */
         .content-wrapper {
             position: relative;
-            z-index: 1; /* 캔버스 위에 배치 */
+            z-index: 1;
             width: 100%;
         }
 
@@ -68,9 +70,8 @@
 
         /* 1. Hero Section */
         .hero { 
-            /* 배경색 제거 (투명), 3D 배경이 보이도록 */
             background-color: transparent; 
-            color: #fff; 
+            color: var(--primary-color); 
             padding: 120px 0 80px; 
             text-align: center; 
             position: relative;
@@ -83,7 +84,8 @@
             margin-bottom: 15px;
             letter-spacing: -0.02em;
             line-height: 1.1;
-            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            color: var(--primary-color);
+            /* 밝은 배경이라 그림자 제거 */
         }
         
         .hero p { 
@@ -93,26 +95,27 @@
             margin-bottom: 40px; 
             text-transform: uppercase;
             letter-spacing: 0.1em;
+            font-weight: 600;
         }
 
         .hero-img-placeholder {
             width: 100%;
             max-width: 800px;
             height: 400px;
-            /* Glassmorphism */
+            /* Light Glass Style */
             background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 2px solid #fff;
             margin: 0 auto;
-            border-radius: 20px;
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #888;
+            color: var(--text-sub);
             font-family: var(--font-secondary);
             font-size: 0.9rem;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            box-shadow: var(--glass-shadow);
         }
 
         /* 2. Sections Generic */
@@ -123,29 +126,31 @@
             margin-bottom: 60px; 
             font-weight: 700;
             font-family: var(--font-primary);
+            color: var(--primary-color);
         }
 
         /* 3. Benefits Grid */
         .benefit-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: center; }
         
         .benefit-card { 
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.7); /* 더 밝은 흰색 */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid #ffffff;
             padding: 40px 20px; 
-            border-radius: 16px; 
-            transition: transform 0.3s ease, background 0.3s ease;
+            border-radius: 20px; 
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
         
         .benefit-card:hover {
             transform: translateY(-10px);
-            background: rgba(255,255,255,0.08);
-            border-color: rgba(255,255,255,0.3);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
-        .benefit-icon { font-size: 2.5rem; margin-bottom: 20px; display: block; }
-        .benefit-card h3 { font-size: 1.3rem; margin-bottom: 15px; color: #fff; }
+        .benefit-icon { font-size: 2.5rem; margin-bottom: 20px; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+        .benefit-card h3 { font-size: 1.3rem; margin-bottom: 15px; color: var(--primary-color); }
         .benefit-card p { font-size: 0.95rem; color: var(--text-sub); line-height: 1.6; }
 
         /* 4. Brand Mood */
@@ -153,29 +158,31 @@
         .mood-img-placeholder {
             width: 100%;
             height: 400px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
+            background: rgba(255,255,255,0.5);
+            border: 2px solid #fff;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #666;
+            color: var(--text-sub);
             margin-bottom: 40px;
             font-family: var(--font-secondary);
+            box-shadow: var(--glass-shadow);
         }
         .mood-text { text-align: center; max-width: 600px; margin: 0 auto; }
-        .mood-text strong { font-size: 1.4rem; color: #fff; display: block; margin-bottom: 20px; }
+        .mood-text strong { font-size: 1.4rem; color: var(--primary-color); display: block; margin-bottom: 20px; }
         .mood-text p { color: var(--text-sub); }
 
         /* 5. Apply CTA */
         .apply-section { padding-bottom: 150px; }
         .apply-box { 
-            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+            /* 밝은 그라데이션 배경 */
+            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(240,242,245,0.8) 100%);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 2px solid #fff;
             padding: 60px 30px; 
-            border-radius: 30px; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2); 
+            border-radius: 36px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08); 
             text-align: center;
         }
         
@@ -200,14 +207,15 @@
         }
 
         footer {
-            border-top: 1px solid var(--glass-border);
+            border-top: 1px solid rgba(0,0,0,0.05);
             padding: 40px 0;
             text-align: center;
-            color: #666;
+            color: var(--text-sub);
             font-family: var(--font-secondary);
             font-size: 0.8rem;
             position: relative;
             z-index: 10;
+            background: rgba(255,255,255,0.8);
         }
 
         /* Mobile Response */
@@ -218,7 +226,7 @@
             .section { padding: 60px 0; }
         }
 
-        /* Overlay Texture (Dust) */
+        /* Overlay Texture (Dust - Inverted for Light Theme) */
         body::after {
             content: "";
             position: fixed;
@@ -226,8 +234,10 @@
             width: 100%; height: 100%;
             background-image: url("https://img.freepik.com/premium-photo/white-dust-scratches-black-background_279525-2.jpg?w=640");
             background-repeat: repeat;
-            opacity: 0.15;
-            mix-blend-mode: screen;
+            opacity: 0.08; /* 불투명도 낮춤 */
+            /* 밝은 배경에 어두운 먼지를 표현하기 위한 필터 및 블렌드 모드 변경 */
+            filter: invert(1); 
+            mix-blend-mode: multiply;
             pointer-events: none;
             z-index: 2;
         }
@@ -236,7 +246,6 @@
 <body>
 
     <div id="container"></div>
-
     <div id="ui-container"></div>
 
     <div class="content-wrapper">
@@ -247,7 +256,7 @@
                 
                 <div class="hero-img-placeholder">
                     [브랜드 메인 영상/이미지 영역]<br>
-                    Fluid Dynamics Theme
+                    Bright & Energetic Theme
                 </div>
             </div>
         </header>
@@ -281,11 +290,11 @@
                 
                 <div class="mood-img-placeholder">
                     [파트너 활동 예시 이미지]<br>
-                    Home Training Lifestyle
+                    Healthy Lifestyle Shot
                 </div>
 
                 <div class="mood-text">
-                    <p style="font-family: var(--font-secondary); color: var(--accent-color); margin-bottom: 10px;">CORE VALUE</p>
+                    <p style="font-family: var(--font-secondary); color: var(--accent-color); margin-bottom: 10px; font-weight: 600;">CORE VALUE</p>
                     <strong>"건강한 에너지를 나누는 사람"</strong>
                     <p>
                         팔로워 수가 많지 않아도 괜찮습니다.<br>
@@ -299,8 +308,8 @@
         <section class="section apply-section">
             <div class="inner">
                 <div class="apply-box">
-                    <h2 style="margin-bottom: 15px; color: #fff;">지금 바로 지원하세요</h2>
-                    <p style="margin-bottom: 30px; color: #ccc;">
+                    <h2 style="margin-bottom: 15px; color: var(--primary-color);">지금 바로 지원하세요</h2>
+                    <p style="margin-bottom: 30px; color: var(--text-sub);">
                         간단한 정보를 남겨주시면 담당자가 검토 후<br>
                         3일 이내에 개별 연락 드립니다.
                     </p>
@@ -309,7 +318,7 @@
                         파트너 신청하기 🚀
                     </a>
                     
-                    <p style="margin-top: 30px; font-size: 0.9rem; color: #666;">
+                    <p style="margin-top: 30px; font-size: 0.9rem; color: #999;">
                         *문의사항: support@movefit.co.kr
                     </p>
                 </div>
@@ -325,17 +334,15 @@
 
     <script type="module">
         import * as THREE from "https://esm.sh/three@0.178.0";
-        import { Pane } from "https://cdn.skypack.dev/tweakpane@4.0.4";
+        
+        // UI 컨트롤 패널은 포트폴리오에서 깔끔하게 보이기 위해 제거했습니다.
+        // import { Pane } from "https://cdn.skypack.dev/tweakpane@4.0.4";
 
         let scene, camera, renderer, material;
         let clock, mouse = { x: 0, y: 0 };
         let cursorSphere3D = new THREE.Vector3(0, 0, 0);
-        let activeMerges = 0;
         let targetMousePosition = new THREE.Vector2(0.5, 0.5);
         let mousePosition = new THREE.Vector2(0.5, 0.5);
-        let lastTime = performance.now();
-        let frameCount = 0;
-        let fps = 0;
 
         // Device detection
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -343,43 +350,42 @@
         const isLowPowerDevice = isMobile || navigator.hardwareConcurrency <= 4;
         const devicePixelRatio = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
 
-        // Define Presets - We will use a modified "Cosmic/Minimal" blend for the background
+        // --- Light Theme Preset Configuration ---
         const bgPreset = {
-            sphereCount: isMobile ? 3 : 6,
-            ambientIntensity: 0.05,
-            diffuseIntensity: 0.5,
-            specularIntensity: 1.0,
-            specularPower: 10,
-            fresnelPower: 2.0,
-            // Darker background to make text readable
-            backgroundColor: new THREE.Color(0x050505),
-            sphereColor: new THREE.Color(0x0a0a0a),
-            // Orange/Blue tint to match MoveFit/Tech vibe
-            lightColor: new THREE.Color(0xff8866), // Subtle orange tint
-            lightPosition: new THREE.Vector3(1, 0.5, 0.8),
-            smoothness: 0.4,
-            contrast: 1.5,
-            fogDensity: 0.1,
-            cursorGlowIntensity: 0.6,
-            cursorGlowRadius: 1.2,
-            cursorGlowColor: new THREE.Color(0xff6644) // Orange glow
+            sphereCount: isMobile ? 3 : 7,
+            ambientIntensity: 0.6, /* 밝은 환경광 */
+            diffuseIntensity: 0.8,
+            specularIntensity: 1.5, /* 반짝임 강조 */
+            specularPower: 30, /* 더 매끄러운 플라스틱 질감 */
+            fresnelPower: 1.5,
+            // Colors for Light Theme
+            backgroundColor: new THREE.Color(0xf0f2f5), // CSS 배경색과 일치
+            sphereColor: new THREE.Color(0x00a8ff),   // 청량한 시안 블루 (Cyan Blue)
+            lightColor: new THREE.Color(0xffffff),    // 순수한 흰색 조명
+            lightPosition: new THREE.Vector3(0.5, 1, 0.8), // 위에서 비추는 조명
+            smoothness: 0.35,
+            contrast: 1.1, /* 대비를 낮춰 부드럽게 */
+            fogDensity: 0.02, /* 밝은 배경이므로 안개 농도를 아주 낮춤 */
+            cursorGlowIntensity: 0.8,
+            cursorGlowRadius: 1.5,
+            cursorGlowColor: new THREE.Color(0xe67e22) // 커서 포인트는 오렌지색
         };
 
         const settings = {
             ...bgPreset,
-            fixedTopLeftRadius: 0.8,
-            fixedBottomRightRadius: 0.9,
-            smallTopLeftRadius: 0.3,
-            smallBottomRightRadius: 0.35,
+            fixedTopLeftRadius: 0.6,
+            fixedBottomRightRadius: 0.7,
+            smallTopLeftRadius: 0.2,
+            smallBottomRightRadius: 0.25,
             cursorRadiusMin: 0.08,
             cursorRadiusMax: 0.15,
-            animationSpeed: 0.4, // Slower for background
-            movementScale: 1.0,
+            animationSpeed: 0.3, 
+            movementScale: 1.1,
             mouseSmoothness: 0.08,
             mergeDistance: 1.5,
             mouseProximityEffect: true,
-            minMovementScale: 0.3,
-            maxMovementScale: 1.0
+            minMovementScale: 0.5,
+            maxMovementScale: 1.1
         };
 
         init();
@@ -394,7 +400,7 @@
 
             renderer = new THREE.WebGLRenderer({
                 antialias: !isMobile && !isLowPowerDevice,
-                alpha: true,
+                alpha: true, /* 투명 배경 허용 */
                 powerPreference: "high-performance",
                 preserveDrawingBuffer: false,
                 premultipliedAlpha: false
@@ -403,7 +409,8 @@
             const pixelRatio = Math.min(devicePixelRatio, isMobile ? 1.5 : 2);
             renderer.setPixelRatio(pixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setClearColor(0x000000, 0);
+            // 렌더러 클리어 컬러를 밝은색으로 설정
+            renderer.setClearColor(settings.backgroundColor, 1); 
             renderer.outputColorSpace = THREE.SRGBColorSpace;
 
             const canvas = renderer.domElement;
@@ -414,13 +421,11 @@
             `;
             container.appendChild(canvas);
 
-            // Shader Material Setup (Same as provided code)
             material = new THREE.ShaderMaterial({
                 uniforms: {
                     uTime: { value: 0 },
                     uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
                     uActualResolution: { value: new THREE.Vector2(window.innerWidth * pixelRatio, window.innerHeight * pixelRatio) },
-                    uPixelRatio: { value: pixelRatio },
                     uMousePosition: { value: new THREE.Vector2(0.5, 0.5) },
                     uCursorSphere: { value: new THREE.Vector3(0, 0, 0) },
                     uCursorRadius: { value: settings.cursorRadiusMin },
@@ -451,8 +456,7 @@
                     uCursorGlowRadius: { value: settings.cursorGlowRadius },
                     uCursorGlowColor: { value: settings.cursorGlowColor },
                     uIsSafari: { value: isSafari ? 1.0 : 0.0 },
-                    uIsMobile: { value: isMobile ? 1.0 : 0.0 },
-                    uIsLowPower: { value: isLowPowerDevice ? 1.0 : 0.0 }
+                    uIsMobile: { value: isMobile ? 1.0 : 0.0 }
                 },
                 vertexShader: `
                     varying vec2 vUv;
@@ -492,7 +496,6 @@
                     uniform float uCursorGlowIntensity;
                     uniform float uCursorGlowRadius;
                     uniform vec3 uCursorGlowColor;
-                    uniform float uIsMobile;
                     
                     const float PI = 3.14159265359;
                     const float EPSILON = 0.001;
@@ -512,13 +515,13 @@
                     
                     float sceneSDF(vec3 pos) {
                         float result = MAX_DIST;
-                        vec3 topLeftPos = screenToWorld(vec2(0.08, 0.92));
+                        vec3 topLeftPos = screenToWorld(vec2(0.1, 0.9));
                         float topLeft = sdSphere(pos - topLeftPos, uFixedTopLeftRadius);
-                        vec3 smallTopLeftPos = screenToWorld(vec2(0.25, 0.72));
+                        vec3 smallTopLeftPos = screenToWorld(vec2(0.3, 0.7));
                         float smallTopLeft = sdSphere(pos - smallTopLeftPos, uSmallTopLeftRadius);
-                        vec3 bottomRightPos = screenToWorld(vec2(0.92, 0.08));
+                        vec3 bottomRightPos = screenToWorld(vec2(0.9, 0.1));
                         float bottomRight = sdSphere(pos - bottomRightPos, uFixedBottomRightRadius);
-                        vec3 smallBottomRightPos = screenToWorld(vec2(0.72, 0.25));
+                        vec3 smallBottomRightPos = screenToWorld(vec2(0.7, 0.3));
                         float smallBottomRight = sdSphere(pos - smallBottomRightPos, uSmallBottomRightRadius);
                         
                         float t = uTime * uAnimationSpeed;
@@ -531,37 +534,30 @@
                         for (int i = 0; i < 10; i++) {
                             if (i >= uSphereCount) break;
                             float fi = float(i);
-                            float speed = 0.4 + fi * 0.12;
-                            float radius = 0.12 + mod(fi, 3.0) * 0.06;
-                            float orbitRadius = (0.3 + mod(fi, 3.0) * 0.15) * dynamicMovementScale;
-                            float phaseOffset = fi * PI * 0.35;
+                            float speed = 0.3 + fi * 0.1;
+                            float radius = 0.15 + mod(fi, 3.0) * 0.05;
+                            float orbitRadius = (0.4 + mod(fi, 2.0) * 0.2) * dynamicMovementScale;
+                            float phaseOffset = fi * PI * 0.4;
                             vec3 offset = vec3(
-                                sin(t * speed + phaseOffset) * orbitRadius * 0.8,
-                                cos(t * speed * 0.85 + phaseOffset * 1.3) * orbitRadius * 0.6,
-                                sin(t * speed * 0.5 + phaseOffset) * 0.3
+                                sin(t * speed + phaseOffset) * orbitRadius,
+                                cos(t * speed * 0.9 + phaseOffset) * orbitRadius * 0.8,
+                                sin(t * speed * 0.6) * 0.2
                             );
                             
                             vec3 toCursor = uCursorSphere - offset;
                             float cursorDist = length(toCursor);
                             if (cursorDist < uMergeDistance) {
-                                float attraction = (1.0 - cursorDist / uMergeDistance) * 0.3;
+                                float attraction = (1.0 - cursorDist / uMergeDistance) * 0.2;
                                 offset += normalize(toCursor) * attraction;
                             }
                             
                             float movingSphere = sdSphere(pos - offset, radius);
-                            float blend = 0.05;
-                            if (cursorDist < uMergeDistance) {
-                                float influence = 1.0 - (cursorDist / uMergeDistance);
-                                blend = mix(0.05, uSmoothness, influence * influence * influence);
-                            }
-                            result = smin(result, movingSphere, blend);
+                            result = smin(result, movingSphere, uSmoothness);
                         }
                         
                         float cursorBall = sdSphere(pos - uCursorSphere, uCursorRadius);
-                        float topLeftGroup = smin(topLeft, smallTopLeft, 0.4);
-                        float bottomRightGroup = smin(bottomRight, smallBottomRight, 0.4);
-                        result = smin(result, topLeftGroup, 0.3);
-                        result = smin(result, bottomRightGroup, 0.3);
+                        result = smin(result, topLeft, 0.4);
+                        result = smin(result, bottomRight, 0.4);
                         result = smin(result, cursorBall, uSmoothness);
                         return result;
                     }
@@ -577,8 +573,8 @@
                     
                     float rayMarch(vec3 ro, vec3 rd) {
                         float t = 0.0;
-                        for (int i = 0; i < 48; i++) {
-                            if (t > 5.0) break;
+                        for (int i = 0; i < 32; i++) {
+                            if (t > 6.0) break;
                             float d = sceneSDF(ro + rd * t);
                             if (d < 0.001) return t;
                             t += d * 0.9;
@@ -599,7 +595,9 @@
                         vec3 ambient = uLightColor * uAmbientIntensity;
                         vec3 diffuse = uLightColor * diff * uDiffuseIntensity;
                         vec3 specular = uLightColor * spec * uSpecularIntensity * fresnel;
-                        vec3 fresnelRim = uLightColor * fresnel * 0.4;
+                        
+                        // 밝은 배경에서는 fresnelRim을 약하게
+                        vec3 fresnelRim = uLightColor * fresnel * 0.2;
                         
                         return uSphereColor + ambient + diffuse + specular + fresnelRim;
                     }
@@ -613,24 +611,25 @@
                         float t = rayMarch(ro, rd);
                         
                         vec3 color = uBackgroundColor;
-                        float cursorGlow = 0.0;
                         float dist = length(ro.xy - uCursorSphere.xy);
                         float glow = 1.0 - smoothstep(0.0, uCursorGlowRadius, dist);
-                        cursorGlow = pow(glow, 2.0) * uCursorGlowIntensity;
+                        float cursorGlowFactor = pow(glow, 2.0) * uCursorGlowIntensity;
                         
                         if (t > 0.0) {
                             vec3 p = ro + rd * t;
                             color = lighting(p, rd);
-                            float fogAmount = 1.0 - exp(-t * uFogDensity);
-                            color = mix(color, uBackgroundColor, fogAmount * 0.3);
-                            color += uCursorGlowColor * cursorGlow * 0.3;
+                            // 안개 효과 약하게 적용
+                            float fogAmount = 1.0 - exp(-t * uFogDensity * 2.0);
+                            color = mix(color, uBackgroundColor, fogAmount);
+                            
+                            // 커서 주변에 오렌지색 틴트 추가
+                            color += uCursorGlowColor * cursorGlowFactor * 0.4;
+                            
                             gl_FragColor = vec4(color, 1.0);
                         } else {
-                            if (cursorGlow > 0.01) {
-                                gl_FragColor = vec4(uCursorGlowColor, cursorGlow * 0.8);
-                            } else {
-                                gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
-                            }
+                            // 배경에 부드러운 오렌지색 글로우 추가
+                            vec3 glowColor = mix(uBackgroundColor, uCursorGlowColor, cursorGlowFactor * 0.3);
+                            gl_FragColor = vec4(glowColor, 1.0);
                         }
                     }
                 `,
