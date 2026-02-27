@@ -1,15 +1,15 @@
 """
-AI Service - Claude API를 활용한 자연어 처리 & ADHD 맞춤 비서
+AI Service - Google Gemini API를 활용한 자연어 처리 & ADHD 맞춤 비서
 """
 import json
 import os
 from datetime import datetime, timedelta
 
-import anthropic
+import google.generativeai as genai
 
-client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
 
-MODEL = os.environ.get("AI_MODEL", "claude-haiku-4-5-20251001")
+MODEL = os.environ.get("AI_MODEL", "gemini-2.0-flash")
 
 SYSTEM_PROMPT = """당신은 ADHD 특성을 깊이 이해하는 따뜻한 업무 비서입니다.
 
@@ -34,135 +34,153 @@ SYSTEM_PROMPT = """당신은 ADHD 특성을 깊이 이해하는 따뜻한 업무
 - 각 세부 단계의 예상 소요시간을 5~30분 단위로 설정
 - ADHD 특성 고려: 시작이 쉬운 것을 앞에 배치
 
-## 응답 형식
-반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트 없이 JSON만 반환하세요.
-
 현재 날짜/시간: {current_time}
 """
 
-PARSE_TASK_TOOLS = [
-    {
-        "name": "create_tasks",
-        "description": "사용자의 자연어 입력을 분석해서 태스크를 생성합니다",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "reply_message": {
-                    "type": "string",
-                    "description": "사용자에게 보낼 따뜻한 응답 메시지 (한국어, ADHD 친화적)",
-                },
-                "tasks": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "title": {"type": "string", "description": "태스크 제목"},
-                            "description": {"type": "string", "description": "태스크 설명"},
-                            "deadline": {
-                                "type": "string",
-                                "description": "마감일 ISO 형식 (YYYY-MM-DDTHH:MM:SS) 또는 null",
-                            },
-                            "priority": {
-                                "type": "integer",
-                                "description": "우선순위 1(높음)~3(낮음)",
-                                "enum": [1, 2, 3],
-                            },
-                            "estimated_min": {
-                                "type": "integer",
-                                "description": "예상 소요시간 (분)",
-                            },
-                            "subtasks": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "title": {"type": "string"},
-                                        "estimated_min": {"type": "integer"},
-                                    },
-                                    "required": ["title"],
-                                },
-                                "description": "ADHD 친화적으로 세분화된 하위 태스크들 (5~15분 단위)",
-                            },
-                        },
-                        "required": ["title"],
-                    },
-                },
-            },
-            "required": ["reply_message", "tasks"],
-        },
-    }
-]
+# ── Gemini Function Declarations ──
 
-WBS_TOOL = [
-    {
-        "name": "generate_wbs",
-        "description": "프로젝트의 WBS(Work Breakdown Structure)를 생성합니다",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "reply_message": {
-                    "type": "string",
-                    "description": "사용자에게 보낼 격려 메시지",
-                },
-                "project_name": {"type": "string"},
-                "phases": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "name": {"type": "string", "description": "단계 이름"},
-                            "tasks": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "title": {"type": "string"},
-                                        "estimated_min": {"type": "integer"},
-                                        "subtasks": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "title": {"type": "string"},
-                                                    "estimated_min": {"type": "integer"},
-                                                },
-                                                "required": ["title"],
+CREATE_TASKS_FUNC = genai.protos.FunctionDeclaration(
+    name="create_tasks",
+    description="사용자의 자연어 입력을 분석해서 태스크를 생성합니다",
+    parameters=genai.protos.Schema(
+        type=genai.protos.Type.OBJECT,
+        properties={
+            "reply_message": genai.protos.Schema(
+                type=genai.protos.Type.STRING,
+                description="사용자에게 보낼 따뜻한 응답 메시지 (한국어, ADHD 친화적)",
+            ),
+            "tasks": genai.protos.Schema(
+                type=genai.protos.Type.ARRAY,
+                items=genai.protos.Schema(
+                    type=genai.protos.Type.OBJECT,
+                    properties={
+                        "title": genai.protos.Schema(type=genai.protos.Type.STRING, description="태스크 제목"),
+                        "description": genai.protos.Schema(type=genai.protos.Type.STRING, description="태스크 설명"),
+                        "deadline": genai.protos.Schema(
+                            type=genai.protos.Type.STRING,
+                            description="마감일 ISO 형식 (YYYY-MM-DDTHH:MM:SS) 또는 빈 문자열",
+                        ),
+                        "priority": genai.protos.Schema(
+                            type=genai.protos.Type.INTEGER,
+                            description="우선순위 1(높음)~3(낮음)",
+                        ),
+                        "estimated_min": genai.protos.Schema(
+                            type=genai.protos.Type.INTEGER,
+                            description="예상 소요시간 (분)",
+                        ),
+                        "subtasks": genai.protos.Schema(
+                            type=genai.protos.Type.ARRAY,
+                            items=genai.protos.Schema(
+                                type=genai.protos.Type.OBJECT,
+                                properties={
+                                    "title": genai.protos.Schema(type=genai.protos.Type.STRING),
+                                    "estimated_min": genai.protos.Schema(type=genai.protos.Type.INTEGER),
+                                },
+                                required=["title"],
+                            ),
+                            description="ADHD 친화적으로 세분화된 하위 태스크들 (5~15분 단위)",
+                        ),
+                    },
+                    required=["title"],
+                ),
+            ),
+        },
+        required=["reply_message", "tasks"],
+    ),
+)
+
+REPLY_FUNC = genai.protos.FunctionDeclaration(
+    name="reply",
+    description="사용자에게 일반 대화로 응답합니다 (업무 관련이 아닌 일반 대화)",
+    parameters=genai.protos.Schema(
+        type=genai.protos.Type.OBJECT,
+        properties={
+            "message": genai.protos.Schema(
+                type=genai.protos.Type.STRING,
+                description="사용자에게 보낼 응답 (한국어, 따뜻하고 ADHD 친화적)",
+            ),
+        },
+        required=["message"],
+    ),
+)
+
+GENERATE_WBS_FUNC = genai.protos.FunctionDeclaration(
+    name="generate_wbs",
+    description="프로젝트의 WBS(Work Breakdown Structure)를 생성합니다",
+    parameters=genai.protos.Schema(
+        type=genai.protos.Type.OBJECT,
+        properties={
+            "reply_message": genai.protos.Schema(
+                type=genai.protos.Type.STRING,
+                description="사용자에게 보낼 격려 메시지",
+            ),
+            "project_name": genai.protos.Schema(type=genai.protos.Type.STRING),
+            "phases": genai.protos.Schema(
+                type=genai.protos.Type.ARRAY,
+                items=genai.protos.Schema(
+                    type=genai.protos.Type.OBJECT,
+                    properties={
+                        "name": genai.protos.Schema(type=genai.protos.Type.STRING, description="단계 이름"),
+                        "tasks": genai.protos.Schema(
+                            type=genai.protos.Type.ARRAY,
+                            items=genai.protos.Schema(
+                                type=genai.protos.Type.OBJECT,
+                                properties={
+                                    "title": genai.protos.Schema(type=genai.protos.Type.STRING),
+                                    "estimated_min": genai.protos.Schema(type=genai.protos.Type.INTEGER),
+                                    "subtasks": genai.protos.Schema(
+                                        type=genai.protos.Type.ARRAY,
+                                        items=genai.protos.Schema(
+                                            type=genai.protos.Type.OBJECT,
+                                            properties={
+                                                "title": genai.protos.Schema(type=genai.protos.Type.STRING),
+                                                "estimated_min": genai.protos.Schema(type=genai.protos.Type.INTEGER),
                                             },
-                                        },
-                                    },
-                                    "required": ["title"],
+                                            required=["title"],
+                                        ),
+                                    ),
                                 },
-                            },
-                        },
-                        "required": ["name", "tasks"],
+                                required=["title"],
+                            ),
+                        ),
                     },
-                },
-            },
-            "required": ["reply_message", "project_name", "phases"],
+                    required=["name", "tasks"],
+                ),
+            ),
         },
-    }
-]
+        required=["reply_message", "project_name", "phases"],
+    ),
+)
 
-CHAT_TOOL = [
-    {
-        "name": "reply",
-        "description": "사용자에게 일반 대화로 응답합니다",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "description": "사용자에게 보낼 응답 (한국어, 따뜻하고 ADHD 친화적)",
-                },
-            },
-            "required": ["message"],
-        },
-    }
-]
+PARSE_TOOLS = genai.protos.Tool(function_declarations=[CREATE_TASKS_FUNC, REPLY_FUNC])
+WBS_TOOLS = genai.protos.Tool(function_declarations=[GENERATE_WBS_FUNC])
 
 
 def _now_str() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M (%A)")
+
+
+def _extract_function_call(response) -> dict | None:
+    """Gemini 응답에서 function call 추출"""
+    for candidate in response.candidates:
+        for part in candidate.content.parts:
+            if part.function_call.name:
+                # proto MapComposite를 일반 dict로 변환
+                args = dict(part.function_call.args)
+                # 중첩된 proto 객체들도 변환
+                args = _proto_to_dict(args)
+                return {"name": part.function_call.name, "args": args}
+    return None
+
+
+def _proto_to_dict(obj):
+    """Proto MapComposite / RepeatedComposite를 순수 Python dict/list로 변환"""
+    if hasattr(obj, "items"):
+        return {k: _proto_to_dict(v) for k, v in obj.items()}
+    elif hasattr(obj, "__iter__") and not isinstance(obj, (str, bytes)):
+        return [_proto_to_dict(item) for item in obj]
+    else:
+        return obj
 
 
 def parse_user_input(user_message: str, context: str = "") -> dict:
@@ -171,20 +189,22 @@ def parse_user_input(user_message: str, context: str = "") -> dict:
     if context:
         system += f"\n\n## 현재 사용자의 태스크 상황:\n{context}"
 
-    messages = [{"role": "user", "content": user_message}]
-
-    response = client.messages.create(
-        model=MODEL,
-        max_tokens=2048,
-        system=system,
-        messages=messages,
-        tools=PARSE_TASK_TOOLS + CHAT_TOOL,
-        tool_choice={"type": "any"},
+    model = genai.GenerativeModel(
+        MODEL,
+        system_instruction=system,
+        tools=[PARSE_TOOLS],
     )
 
-    for block in response.content:
-        if block.type == "tool_use":
-            return {"action": block.name, "data": block.input}
+    response = model.generate_content(
+        user_message,
+        tool_config=genai.types.content_types.to_tool_config({
+            "function_calling_config": {"mode": "ANY"},
+        }),
+    )
+
+    fc = _extract_function_call(response)
+    if fc:
+        return {"action": fc["name"], "data": fc["args"]}
 
     return {"action": "reply", "data": {"message": "무슨 말인지 이해했어요! 좀 더 자세히 알려주시겠어요?"}}
 
@@ -193,25 +213,22 @@ def generate_wbs(project_description: str) -> dict:
     """프로젝트 설명으로부터 WBS를 생성"""
     system = SYSTEM_PROMPT.format(current_time=_now_str())
 
-    messages = [
-        {
-            "role": "user",
-            "content": f"다음 프로젝트의 WBS를 만들어줘. ADHD 특성을 고려해서 작은 단위로 쪼개줘:\n\n{project_description}",
-        }
-    ]
-
-    response = client.messages.create(
-        model=MODEL,
-        max_tokens=4096,
-        system=system,
-        messages=messages,
-        tools=WBS_TOOL,
-        tool_choice={"type": "tool", "name": "generate_wbs"},
+    model = genai.GenerativeModel(
+        MODEL,
+        system_instruction=system,
+        tools=[WBS_TOOLS],
     )
 
-    for block in response.content:
-        if block.type == "tool_use":
-            return block.input
+    response = model.generate_content(
+        f"다음 프로젝트의 WBS를 만들어줘. ADHD 특성을 고려해서 작은 단위로 쪼개줘:\n\n{project_description}",
+        tool_config=genai.types.content_types.to_tool_config({
+            "function_calling_config": {"mode": "ANY"},
+        }),
+    )
+
+    fc = _extract_function_call(response)
+    if fc:
+        return fc["args"]
 
     return None
 
@@ -239,14 +256,13 @@ def generate_daily_message(tasks: list[dict], stats: dict) -> str:
 - 200자 이내로 간결하게
 """
 
-    response = client.messages.create(
-        model=MODEL,
-        max_tokens=512,
-        system="당신은 ADHD 특성을 이해하는 따뜻한 업무 비서입니다. 한국어로 응답하세요.",
-        messages=[{"role": "user", "content": prompt}],
+    model = genai.GenerativeModel(
+        MODEL,
+        system_instruction="당신은 ADHD 특성을 이해하는 따뜻한 업무 비서입니다. 한국어로 응답하세요.",
     )
 
-    return response.content[0].text
+    response = model.generate_content(prompt)
+    return response.text
 
 
 def generate_nudge_message(task: dict) -> str:
@@ -262,11 +278,10 @@ def generate_nudge_message(task: dict) -> str:
 - 100자 이내
 """
 
-    response = client.messages.create(
-        model=MODEL,
-        max_tokens=256,
-        system="당신은 ADHD 특성을 이해하는 따뜻한 업무 비서입니다. 한국어로 응답하세요.",
-        messages=[{"role": "user", "content": prompt}],
+    model = genai.GenerativeModel(
+        MODEL,
+        system_instruction="당신은 ADHD 특성을 이해하는 따뜻한 업무 비서입니다. 한국어로 응답하세요.",
     )
 
-    return response.content[0].text
+    response = model.generate_content(prompt)
+    return response.text

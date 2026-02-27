@@ -24,14 +24,14 @@
 4. 봇 username 입력 (예: "my_work_assistant_bot")
 5. **토큰을 복사해두세요** (형식: `123456789:ABCdefGHIjklMNO...`)
 
-### 2단계: Anthropic API 키 발급 (2분)
+### 2단계: Gemini API 키 발급 (2분)
 
-1. [console.anthropic.com](https://console.anthropic.com) 접속
-2. API Keys 메뉴에서 새 키 생성
+1. [aistudio.google.com](https://aistudio.google.com/apikey) 접속
+2. "Get API Key" → 새 키 생성
 3. **키를 복사해두세요**
 
-> 💡 **비용**: Claude Haiku 모델 사용 시 대화 한 번에 약 $0.001 이하입니다.
-> 하루 100번 대화해도 월 $3 이하.
+> 💡 **비용**: Gemini Flash 모델은 무료 티어가 있고, 유료도 매우 저렴합니다.
+> Google One AI Premium 구독이 있으면 넉넉하게 사용 가능.
 
 ### 3단계: Railway로 배포 (5분)
 
@@ -42,7 +42,7 @@
 
 ```
 TELEGRAM_TOKEN=위에서_복사한_텔레그램_토큰
-ANTHROPIC_API_KEY=위에서_복사한_API_키
+GEMINI_API_KEY=위에서_복사한_Gemini_API_키
 ```
 
 5. Deploy 클릭!
@@ -135,7 +135,7 @@ python bot.py
 
 ```
 텔레그램 앱 → Telegram Bot API → Python 서버
-                                    ├── Claude API (AI 두뇌)
+                                    ├── Gemini API (AI 두뇌)
                                     ├── SQLite (로컬 태스크 DB)
                                     ├── APScheduler (리마인더)
                                     └── Google APIs
@@ -150,6 +150,6 @@ python bot.py
 |------|------|
 | 텔레그램 | 무료 |
 | Railway 서버 | ~$0 (무료 크레딧 $5/월) |
-| Claude Haiku API | ~$1-3/월 (하루 50~100회 대화 기준) |
+| Gemini API | 무료~$1/월 (Flash 무료 티어 있음, 구독 시 넉넉) |
 | Google APIs | 무료 |
-| **합계** | **월 $1~3** |
+| **합계** | **월 $0~1** |
