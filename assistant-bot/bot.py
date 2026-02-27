@@ -596,7 +596,7 @@ def main():
     scheduler.set_bot(app.bot)
     scheduler.start_scheduler()
 
-    logger.info("Bot started!")
+    logger.info("Bot started! v1.0")
     app.run_polling(drop_pending_updates=True)
 
 
