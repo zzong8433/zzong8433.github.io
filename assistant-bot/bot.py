@@ -526,6 +526,30 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await update.message.reply_text(text, parse_mode="Markdown")
 
+    elif action == "create_reminder":
+        remind_at = data.get("remind_at", "")
+        message = data.get("message", "")
+        reply = data.get("reply_message", "알림 설정했어요!")
+
+        db.create_reminder(
+            user_id=user.id,
+            remind_at=remind_at,
+            message=message,
+        )
+
+        # 알림 시간을 보기 좋게 표시
+        try:
+            from datetime import datetime
+            dt = datetime.fromisoformat(remind_at)
+            time_str = dt.strftime("%m/%d(%a) %H:%M")
+        except Exception:
+            time_str = remind_at
+
+        await update.message.reply_text(
+            f"{reply}\n\n⏰ **알림 예약:** {time_str}\n📝 {message}",
+            parse_mode="Markdown",
+        )
+
     elif action == "reply":
         await update.message.reply_text(data.get("message", ""))
 

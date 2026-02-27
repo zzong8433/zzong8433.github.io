@@ -172,6 +172,31 @@ WBS_TOOL = [
     }
 ]
 
+REMINDER_TOOL = [
+    {
+        "name": "create_reminder",
+        "description": "사용자가 특정 시간에 알림을 받고 싶을 때 리마인더를 생성합니다. '월요일에 알려줘', '내일 3시에 리마인드' 등",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "reply_message": {
+                    "type": "string",
+                    "description": "사용자에게 보낼 따뜻한 확인 메시지 (한국어)",
+                },
+                "remind_at": {
+                    "type": "string",
+                    "description": "알림 시간 ISO 형식 (YYYY-MM-DDTHH:MM:SS). 시간 미지정 시 오전 9시로 설정",
+                },
+                "message": {
+                    "type": "string",
+                    "description": "알림 시 보여줄 메시지 내용",
+                },
+            },
+            "required": ["reply_message", "remind_at", "message"],
+        },
+    }
+]
+
 CHAT_TOOL = [
     {
         "name": "reply",
@@ -207,7 +232,7 @@ def parse_user_input(user_message: str, context: str = "", user_id: int = 0) -> 
         max_tokens=2048,
         system=system,
         messages=messages,
-        tools=PARSE_TASK_TOOLS + CHAT_TOOL,
+        tools=PARSE_TASK_TOOLS + REMINDER_TOOL + CHAT_TOOL,
         tool_choice={"type": "any"},
     )
 
