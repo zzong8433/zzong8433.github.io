@@ -138,6 +138,12 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
 • /google - Google 계정 연결
 • 연결하면 Calendar, Tasks, Sheets 자동 동기화
 
+**AI 모델**
+• /model - 현재 모델 확인
+• /model `haiku` - 빠른 모드
+• /model `sonnet` - 똑똑 모드
+• /model `auto` - 자동 (기본)
+
 **통계**
 • /stats - 완료율, 진행 현황
 
@@ -266,7 +272,7 @@ async def cmd_wbs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     project_desc = " ".join(context.args)
     await update.message.reply_text("🔨 WBS를 만들고 있어요... 잠시만요!")
 
-    wbs = ai_service.generate_wbs(project_desc)
+    wbs = ai_service.generate_wbs(project_desc, user_id=user_id)
     if not wbs:
         await update.message.reply_text("WBS 생성에 문제가 있었어요. 다시 시도해주세요!")
         return
@@ -376,6 +382,35 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text, parse_mode="Markdown")
 
 
+async def cmd_model(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+
+    if not context.args:
+        current = ai_service.get_user_model_info(user_id)
+        await update.message.reply_text(
+            f"**🤖 현재 AI 모델: {current}**\n\n"
+            "변경하려면:\n"
+            "• `/model haiku` - 빠르고 저렴 (일상용)\n"
+            "• `/model sonnet` - 똑똑하고 정확 (복잡한 작업)\n"
+            "• `/model auto` - 자동 (평소 Haiku, WBS는 Sonnet)",
+            parse_mode="Markdown",
+        )
+        return
+
+    choice = context.args[0].lower()
+    if choice == "haiku":
+        ai_service.set_user_model(user_id, ai_service.MODEL_FAST)
+        await update.message.reply_text("⚡ **Haiku 모드** 설정! 빠르고 가볍게 갑니다.", parse_mode="Markdown")
+    elif choice == "sonnet":
+        ai_service.set_user_model(user_id, ai_service.MODEL_SMART)
+        await update.message.reply_text("🧠 **Sonnet 모드** 설정! 더 정확하고 똑똑하게 갑니다.", parse_mode="Markdown")
+    elif choice == "auto":
+        ai_service.set_user_model(user_id, None)
+        await update.message.reply_text("🔄 **자동 모드** 설정! 평소엔 Haiku, WBS는 Sonnet으로.", parse_mode="Markdown")
+    else:
+        await update.message.reply_text("haiku, sonnet, auto 중 하나를 선택해주세요!")
+
+
 async def cmd_google(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
 
@@ -424,7 +459,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # AI에게 현재 컨텍스트와 함께 전달
     task_context = _task_context(user.id)
-    result = ai_service.parse_user_input(user_message, context=task_context)
+    result = ai_service.parse_user_input(user_message, context=task_context, user_id=user.id)
 
     action = result["action"]
     data = result["data"]
@@ -545,6 +580,7 @@ def main():
     app.add_handler(CommandHandler("wbs", cmd_wbs))
     app.add_handler(CommandHandler("projects", cmd_projects))
     app.add_handler(CommandHandler("stats", cmd_stats))
+    app.add_handler(CommandHandler("model", cmd_model))
     app.add_handler(CommandHandler("google", cmd_google))
 
     # 자연어 메시지 핸들러

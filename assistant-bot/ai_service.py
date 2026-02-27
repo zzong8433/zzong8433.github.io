@@ -9,7 +9,36 @@ import anthropic
 
 client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
 
-MODEL = os.environ.get("AI_MODEL", "claude-haiku-4-5-20251001")
+MODEL_FAST = "claude-haiku-4-5-20251001"      # 일상 대화, 태스크 파싱 (저렴, 빠름)
+MODEL_SMART = "claude-sonnet-4-5-20250514"     # WBS 생성, 복잡한 분석 (정확, 비쌈)
+
+# 사용자별 수동 오버라이드 저장 (user_id → model)
+_user_model_override: dict[int, str] = {}
+
+
+def get_model(user_id: int = 0, task_type: str = "fast") -> str:
+    """사용자별 모델 반환. 수동 오버라이드 > 태스크 타입별 자동 선택"""
+    override = _user_model_override.get(user_id)
+    if override:
+        return override
+    return MODEL_SMART if task_type == "smart" else MODEL_FAST
+
+
+def set_user_model(user_id: int, model: str | None):
+    """사용자별 모델 수동 설정. None이면 자동 모드로 복귀"""
+    if model is None:
+        _user_model_override.pop(user_id, None)
+    else:
+        _user_model_override[user_id] = model
+
+
+def get_user_model_info(user_id: int) -> str:
+    """현재 사용자의 모델 설정 정보 반환"""
+    override = _user_model_override.get(user_id)
+    if override:
+        name = "Sonnet (똑똑)" if "sonnet" in override else "Haiku (빠름)"
+        return f"수동 고정: {name}"
+    return "자동 (평소 Haiku, WBS는 Sonnet)"
 
 SYSTEM_PROMPT = """당신은 ADHD 특성을 깊이 이해하는 따뜻한 업무 비서입니다.
 
@@ -165,7 +194,7 @@ def _now_str() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M (%A)")
 
 
-def parse_user_input(user_message: str, context: str = "") -> dict:
+def parse_user_input(user_message: str, context: str = "", user_id: int = 0) -> dict:
     """사용자의 자연어 입력을 분석해서 태스크 생성 또는 일반 대화로 분류"""
     system = SYSTEM_PROMPT.format(current_time=_now_str())
     if context:
@@ -174,7 +203,7 @@ def parse_user_input(user_message: str, context: str = "") -> dict:
     messages = [{"role": "user", "content": user_message}]
 
     response = client.messages.create(
-        model=MODEL,
+        model=get_model(user_id, "fast"),
         max_tokens=2048,
         system=system,
         messages=messages,
@@ -189,8 +218,8 @@ def parse_user_input(user_message: str, context: str = "") -> dict:
     return {"action": "reply", "data": {"message": "무슨 말인지 이해했어요! 좀 더 자세히 알려주시겠어요?"}}
 
 
-def generate_wbs(project_description: str) -> dict:
-    """프로젝트 설명으로부터 WBS를 생성"""
+def generate_wbs(project_description: str, user_id: int = 0) -> dict:
+    """프로젝트 설명으로부터 WBS를 생성 (자동으로 Sonnet 사용)"""
     system = SYSTEM_PROMPT.format(current_time=_now_str())
 
     messages = [
@@ -201,7 +230,7 @@ def generate_wbs(project_description: str) -> dict:
     ]
 
     response = client.messages.create(
-        model=MODEL,
+        model=get_model(user_id, "smart"),
         max_tokens=4096,
         system=system,
         messages=messages,
@@ -240,7 +269,7 @@ def generate_daily_message(tasks: list[dict], stats: dict) -> str:
 """
 
     response = client.messages.create(
-        model=MODEL,
+        model=MODEL_FAST,
         max_tokens=512,
         system="당신은 ADHD 특성을 이해하는 따뜻한 업무 비서입니다. 한국어로 응답하세요.",
         messages=[{"role": "user", "content": prompt}],
@@ -263,7 +292,7 @@ def generate_nudge_message(task: dict) -> str:
 """
 
     response = client.messages.create(
-        model=MODEL,
+        model=MODEL_FAST,
         max_tokens=256,
         system="당신은 ADHD 특성을 이해하는 따뜻한 업무 비서입니다. 한국어로 응답하세요.",
         messages=[{"role": "user", "content": prompt}],
